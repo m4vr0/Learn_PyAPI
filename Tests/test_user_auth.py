@@ -1,9 +1,9 @@
 import pytest
 import requests
-from Lib
+from Lib.basecase import BaseCase
 
 
-class TestUserAuth():
+class TestUserAuth(BaseCase):
     exclude_params = [
         ("no_cookie"),
         ("no_token")
@@ -18,13 +18,9 @@ class TestUserAuth():
 
         login_response = requests.post('https://playground.learnqa.ru/api/user/login', data=data)
 
-        assert "auth_sid" in login_response.cookies, f"There is no auth cookie in the Response"
-        assert "x-csrf-token" in login_response.headers, f"There is no CSRF-token in the Response"
-        assert "user_id" in login_response.json(), f"There is no user id in the Response"
-
-        self.auth_sid = login_response.cookies.get("auth_sid")
-        self.csrf_token = login_response.headers.get("x-csrf-token")
-        self.user_id_from_auth = login_response.json()["user_id"]
+        self.auth_sid = self.get_cookie(response=login_response, cookie_name="auth_sid")
+        self.csrf_token = self.get_header(login_response, "x-csrf-token")
+        self.user_id_from_auth = self.get_json_value(login_response, "user_id")
 
     def teardown_class(self):
         print("\nTeardown...")
