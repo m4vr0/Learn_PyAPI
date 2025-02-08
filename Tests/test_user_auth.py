@@ -1,6 +1,7 @@
 import pytest
 import requests
 from Lib.basecase import BaseCase
+from Lib.assertions import Assertions
 
 
 class TestUserAuth(BaseCase):
@@ -18,9 +19,9 @@ class TestUserAuth(BaseCase):
 
         login_response = requests.post('https://playground.learnqa.ru/api/user/login', data=data)
 
-        self.auth_sid = self.get_cookie(response=login_response, cookie_name="auth_sid")
-        self.csrf_token = self.get_header(login_response, "x-csrf-token")
-        self.user_id_from_auth = self.get_json_value(login_response, "user_id")
+        self.auth_sid = self.get_cookie(self, login_response, "auth_sid")
+        self.csrf_token = self.get_header(self, login_response, "x-csrf-token")
+        self.user_id_from_auth = self.get_json_value(self, login_response, "user_id")
 
     def teardown_class(self):
         print("\nTeardown...")
@@ -32,11 +33,12 @@ class TestUserAuth(BaseCase):
             cookies={"auth_sid": self.auth_sid}
         )
 
-        assert "user_id" in chk_auth_response.json(), f"There is no user id in the Check Auth Response"
-
-        user_id_from_chk = chk_auth_response.json()["user_id"]
-
-        assert self.user_id_from_auth == user_id_from_chk, f"User id from Auth method is not equal to user id from Check Auth method"
+        Assertions.assert_json_value_by_name(
+            response=chk_auth_response,
+            name="user_id",
+            expected_value=self.user_id_from_auth,
+            error_message=f"User id from Auth method was not equal to user id from check method"
+        )
 
     @pytest.mark.parametrize("condition", exclude_params)
     def test_negative_auth_check(self, condition):
@@ -51,8 +53,9 @@ class TestUserAuth(BaseCase):
                 cookies={"auth_sid": self.auth_sid}
             )
 
-        assert "user_id" in response.json(), f"There is no user id in the Response"
-
-        user_id_from_chk = response.json()["user_id"]
-
-        assert user_id_from_chk == 0, f"User is authorized with condition {condition}"
+        Assertions.assert_json_value_by_name(
+            response=response,
+            name="user_id",
+            expected_value=0,
+            error_message=f"User is authorized with condition {condition}"
+        )
