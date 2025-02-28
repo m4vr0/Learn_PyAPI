@@ -1,4 +1,4 @@
-fimport json
+import json
 from requests import Response
 from typing import Any
 
@@ -45,6 +45,44 @@ class Assertions:
         response_as_dict = Assertions.__get_json(response)
 
         assert name in response_as_dict, f"{name} was not found in response"
+
+    @staticmethod
+    def assert_json_has_keys(response: Response, names: list) -> None:
+        """
+        Проверяет, что в JSON-ответе присутствует указанный ключ.
+
+        :param response: HTTP-ответ в формате Response
+        :param names: Список имён ключей, которые должны присутствовать в JSON
+        """
+        response_as_dict = Assertions.__get_json(response)
+
+        for name in names:
+            assert name in response_as_dict, f"{name} was not found in response"
+
+    @staticmethod
+    def assert_json_has_not_key(response: Response, name: str) -> None:
+        """
+        Проверяет, что в JSON-ответе присутствует указанный ключ.
+
+        :param response: HTTP-ответ в формате Response
+        :param name: Имя ключа, который должен присутствовать в JSON
+        """
+        response_as_dict = Assertions.__get_json(response)
+
+        assert name not in response_as_dict, (f"Response shouldn't have key {name} but it's was found in response")
+
+    @staticmethod
+    def assert_json_has_not_keys(response: Response, names: list) -> None:
+        """
+        Проверяет, что в JSON-ответе присутствует указанный ключ.
+
+        :param response: HTTP-ответ в формате Response
+        :param names: Список имён ключей, которые должны присутствовать в JSON
+        """
+        response_as_dict = Assertions.__get_json(response)
+
+        for name in names:
+            assert name not in response_as_dict, f"Response shouldn't have key {name} but it's was found in response"
 
     @staticmethod
     def assert_status_code(response: Response, expected_status: int) -> None:
