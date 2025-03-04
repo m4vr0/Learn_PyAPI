@@ -1,4 +1,5 @@
 import requests
+from Lib.my_requests import MyRequests
 from Lib.basecase import BaseCase
 from Lib.assertions import Assertions
 
@@ -8,7 +9,7 @@ class TestUserGet(BaseCase):
         pass
 
     def test_get_user_details_not_auth(self):
-        response = requests.get(self.url)
+        response = MyRequests.get('/user/2')
         print(response.content)
         Assertions.assert_json_has_key(response, "username")
         Assertions.assert_json_has_not_key(response, "email")
@@ -23,7 +24,7 @@ class TestUserGet(BaseCase):
             'email': 'vinkotov@example.com',
             'password': '1234'
         }
-        response1 = requests.post(f'https://playground.learnqa.ru/api/user/login', data=login_data)
+        response1 = MyRequests.post(f'/user/login', data=login_data)
 
         # print(f"JSON: {response1.json()}")
 
@@ -37,8 +38,8 @@ class TestUserGet(BaseCase):
         user_id_from_auth_method = self.get_json_value(response1, "user_id")
 
         # Получение данных пользователя с авторизацией
-        response2 = requests.get(
-            f'https://playground.learnqa.ru/api/user/{user_id_from_auth_method}',
+        response2 = MyRequests.get(
+            f'/user/{user_id_from_auth_method}',
             headers={"x-csrf-token": token},
             cookies={"auth_sid": auth_sid}
         )
